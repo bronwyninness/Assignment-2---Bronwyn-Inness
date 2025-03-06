@@ -5,3 +5,37 @@ editor: visual
 ---
 
 ## Assignment 2
+
+Importing data and recoding variables
+
+```{r}
+library(tidyverse)
+library(haven)
+affect_data <- read_sav("PSYR6003.A2.sav")
+view(affect_data)
+unique(affect_data$sex)
+
+##Changing the variable 'sex' into a factor instead of a string
+affect_data$sex <- factor(affect_data$sex, levels = c("Female", "Male", "Other (specify)"), labels = c(0, 1, 2))
+view(affect_data)
+view(affect_data$sex)
+
+```
+
+Subscale totals
+
+```{r}
+affect_data <- mutate(affect_data, 
+                      mps.SPP.3y_total = mps.SPP1.3y + mps.SPP2.3y + mps.SPP3.3y + mps.SPP4.3y + mps.SPP5.3y,
+                      guilt.3y_total = guilt1.3y + guilt2.3y + guilt3.3y,
+                      dep.3y = dep1.3y + dep2.3y + dep3.3y,
+                      fear.3y_total = fear1.3y + fear2.3y + fear3.3y,
+                      host.3y_total = host1.3y + host2.3y + host3.3y
+                      )
+view(affect_data)
+affect_data <- mutate(affect_data, tipm.CONS2.3y_reversed = 8 - tipm.CONS2.3y)
+
+affect_data <- mutate(affect_data, tipm_total = tipm.CONS1.3y + tipm.CONS2.3y_reversed)
+
+view(affect_data)
+```
