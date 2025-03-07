@@ -15,8 +15,10 @@ affect_data <- read_sav("PSYR6003.A2.sav")
 view(affect_data)
 unique(affect_data$sex)
 
+##Removing the one data point of "Other (specify)"
+affect_data <- affect_data[affect_data$sex != "Other (specify)", ]
 ##Changing the variable 'sex' into a factor instead of a string
-affect_data$sex <- factor(affect_data$sex, levels = c("Female", "Male", "Other (specify)"), labels = c(0, 1, 2))
+affect_data$sex <- factor(affect_data$sex, levels = c("Female", "Male"), labels = c(0, 1))
 view(affect_data)
 view(affect_data$sex)
 
@@ -124,7 +126,7 @@ library(tidyverse)
 library(flexplot)
 ##SPP will predict unique variance in negative affect over and above sex and conscientiousness in a meaningful way.
 reduced2 <- lm(neg_affect_total~sex + tipm_total, affect_data)
-full2 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data) ##how is this different than full1????
+full2 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data) ##exact same as full1 model, that's okay!!
 ##compare models
 model.comparison(reduced2,full2)
 ##get estimates
