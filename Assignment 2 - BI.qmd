@@ -20,6 +20,8 @@ affect_data$sex <- factor(affect_data$sex, levels = c("Female", "Male", "Other (
 view(affect_data)
 view(affect_data$sex)
 
+affect_data <- na.omit(affect_data)
+
 ```
 
 Subscale totals
@@ -28,7 +30,7 @@ Subscale totals
 affect_data <- mutate(affect_data, 
                       mps.SPP.3y_total = mps.SPP1.3y + mps.SPP2.3y + mps.SPP3.3y + mps.SPP4.3y + mps.SPP5.3y,
                       guilt.3y_total = guilt1.3y + guilt2.3y + guilt3.3y,
-                      dep.3y = dep1.3y + dep2.3y + dep3.3y,
+                      dep.3y_total = dep1.3y + dep2.3y + dep3.3y,
                       fear.3y_total = fear1.3y + fear2.3y + fear3.3y,
                       host.3y_total = host1.3y + host2.3y + host3.3y
                       )
@@ -38,4 +40,95 @@ affect_data <- mutate(affect_data, tipm.CONS2.3y_reversed = 8 - tipm.CONS2.3y)
 affect_data <- mutate(affect_data, tipm_total = tipm.CONS1.3y + tipm.CONS2.3y_reversed)
 
 view(affect_data)
+
+#summary of perfectionism subscale
+summarise(affect_data, avg_mps.SPP.3y = mean(mps.SPP.3y_total))
+summarise(affect_data, sd_mps.SPP.3y = sd(mps.SPP.3y_total))
+summarise(affect_data, range_mps.SPP.3y = range(mps.SPP.3y_total))
+#summary of guilt subscale
+summarise(affect_data, avg_guilt.3y_total = mean(guilt.3y_total))
+summarise(affect_data, sd_guilt.3y_total = sd(guilt.3y_total))
+summarise(affect_data, range_guilt.3y_total = range(guilt.3y_total))
+##summary of dep subscale
+summarise(affect_data, avg_dep.3y_total = mean(dep.3y_total))
+summarise(affect_data, sd_dep.3y_total = sd(dep.3y_total))
+summarise(affect_data, range_dep.3y_total = range(dep.3y_total))
+##summary of fear subscale
+summarise(affect_data, avg_fear.3y_total = mean(fear.3y_total))
+summarise(affect_data, sd_fear.3y_total = sd(fear.3y_total))
+summarise(affect_data, range_fear.3y_total = range(fear.3y_total))
+##summary of host subscale
+summarise(affect_data, avg_host.3y_total = mean(host.3y_total))
+summarise(affect_data, sd_host.3y_total = sd(host.3y_total))
+summarise(affect_data, range_host.3y_total = range(host.3y_total))
+##summary of conscientiousness subscale
+summarise(affect_data, avg_tipm_total = mean(tipm_total))
+summarise(affect_data, sd_tipm_total = sd(tipm_total))
+summarise(affect_data, range_tipm_total = range(tipm_total))
+```
+
+Statistical assumptions
+
+```{r}
+library(flexplot)
+library(tidyverse)
+##negative affect = b0 + b1*sex + b2*conscientiousness + b3*SPP
+##univariate and model visualizations
+flexplot(sex~1, affect_data)
+flexplot(tipm_total~1, affect_data)
+affect_data <- mutate(affect_data, neg_affect_total = guilt.3y_total + dep.3y_total + fear.3y_total + host.3y_total)
+flexplot(mps.SPP.3y_total~1, affect_data)
+flexplot(neg_affect_total~1, affect_data)
+
+flexplot(neg_affect_total~mps.SPP.3y_total + sex|tipm_total, affect_data, method = "lm") ##CONFUSADO
+
+##AVP plot controlling for sex and conscientiousness (hyp 2)
+added.plot(neg_affect_total~mps.SPP.3y_total, affect_data, lm_formula = neg_affect_total~sex + tipm_total)
+
+##testing assumptions
+test_model <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data)
+visualize(test_model, plot = "residuals")
+```
+
+Bivariate correlations
+
+```{r}
+install.packages("apaTables")
+library(apaTables)
+##creating a correlation table with means and sds
+correlations <- select(affect_data, ends_with("total"))
+table1 <- apa.cor.table(correlations, table.number = 1, filename = "table1.doc")
+table1
+```
+
+Hypothesis 1 Results
+
+```{r}
+library(tidyverse)
+library(flexplot)
+##Sex, conscientiousness, and SPP will all significantly predict negative affect, in the manner described above.
+reduced1 <- lm(neg_affect_total~1, affect_data)
+full1 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data)
+##compare models
+model.comparison(reduced1,full1)
+##get estimates
+estimates(full1)
+##summary
+summary(full1)
+```
+
+Hypothesis 2 Results
+
+```{r}
+library(tidyverse)
+library(flexplot)
+##SPP will predict unique variance in negative affect over and above sex and conscientiousness in a meaningful way.
+reduced2 <- lm(neg_affect_total~sex + tipm_total, affect_data)
+full2 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data) ##how is this different than full1????
+##compare models
+model.comparison(reduced2,full2)
+##get estimates
+estimates(full2)
+##summary
+summary(full2)
 ```
