@@ -82,7 +82,8 @@ affect_data <- mutate(affect_data, neg_affect_total = guilt.3y_total + dep.3y_to
 flexplot(mps.SPP.3y_total~1, affect_data)
 flexplot(neg_affect_total~1, affect_data)
 
-flexplot(neg_affect_total~mps.SPP.3y_total + sex|tipm_total, affect_data, method = "lm") ##CONFUSADO
+##Model visualized
+flexplot(neg_affect_total~tipm_total + sex|mps.SPP.3y_total, affect_data, method = "lm") 
 
 ##AVP plot controlling for sex and conscientiousness (hyp 2)
 added.plot(neg_affect_total~mps.SPP.3y_total, affect_data, lm_formula = neg_affect_total~sex + tipm_total)
@@ -111,6 +112,9 @@ library(flexplot)
 ##Sex, conscientiousness, and SPP will all significantly predict negative affect, in the manner described above.
 reduced1 <- lm(neg_affect_total~1, affect_data)
 full1 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data)
+##Visualize models
+visualize(full1, plot = "residuals")
+flexplot(neg_affect_total~tipm_total + sex | mps.SPP.3y_total, affect_data, method="lm")
 ##compare models
 model.comparison(reduced1,full1)
 ##get estimates
@@ -127,10 +131,25 @@ library(flexplot)
 ##SPP will predict unique variance in negative affect over and above sex and conscientiousness in a meaningful way.
 reduced2 <- lm(neg_affect_total~sex + tipm_total, affect_data)
 full2 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data) ##exact same as full1 model, that's okay!!
+##Visualize models
+flexplot(neg_affect_total~tipm_total + sex, affect_data, method="lm")
+##AVP plot controlling for sex and conscientiousness (hyp 2)
+added.plot(neg_affect_total~mps.SPP.3y_total, affect_data, lm_formula = neg_affect_total~sex + tipm_total)
 ##compare models
 model.comparison(reduced2,full2)
 ##get estimates
 estimates(full2)
 ##summary
 summary(full2)
+```
+
+Table 2
+
+```{r}
+library(apaTables)
+
+table2 <- apa.reg.table(full1,
+                        table.number = 2,
+                        filename = "table2.doc")
+table2
 ```
