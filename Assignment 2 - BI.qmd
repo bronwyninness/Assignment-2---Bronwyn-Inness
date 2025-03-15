@@ -26,20 +26,27 @@ affect_data <- na.omit(affect_data)
 
 ```
 
+TEST DELETE
+
+```{r}
+test_data <- mutate(affect_data, test_total = (tipm.CONS1.3y + tipm.CONS2.3y)/2) ##DELETE
+view(test_data)
+```
+
 Subscale totals
 
 ```{r}
 affect_data <- mutate(affect_data, 
-                      mps.SPP.3y_total = mps.SPP1.3y + mps.SPP2.3y + mps.SPP3.3y + mps.SPP4.3y + mps.SPP5.3y,
-                      guilt.3y_total = guilt1.3y + guilt2.3y + guilt3.3y,
-                      dep.3y_total = dep1.3y + dep2.3y + dep3.3y,
-                      fear.3y_total = fear1.3y + fear2.3y + fear3.3y,
-                      host.3y_total = host1.3y + host2.3y + host3.3y
+                      mps.SPP.3y_total = (mps.SPP1.3y + mps.SPP2.3y + mps.SPP3.3y + mps.SPP4.3y + mps.SPP5.3y)/5,
+                      guilt.3y_total = (guilt1.3y + guilt2.3y + guilt3.3y)/3,
+                      dep.3y_total = (dep1.3y + dep2.3y + dep3.3y)/3,
+                      fear.3y_total = (fear1.3y + fear2.3y + fear3.3y)/3,
+                      host.3y_total = (host1.3y + host2.3y + host3.3y)/3
                       )
 view(affect_data)
 affect_data <- mutate(affect_data, tipm.CONS2.3y_reversed = 8 - tipm.CONS2.3y)
 
-affect_data <- mutate(affect_data, tipm_total = tipm.CONS1.3y + tipm.CONS2.3y_reversed)
+affect_data <- mutate(affect_data, tipm_total = (tipm.CONS1.3y + tipm.CONS2.3y_reversed)/2)
 
 view(affect_data)
 
@@ -78,10 +85,10 @@ library(tidyverse)
 ##univariate and model visualizations
 flexplot(sex~1, affect_data)
 flexplot(tipm_total~1, affect_data)
-affect_data <- mutate(affect_data, neg_affect_total = guilt.3y_total + dep.3y_total + fear.3y_total + host.3y_total)
+affect_data <- mutate(affect_data, neg_affect_total = (guilt.3y_total + dep.3y_total + fear.3y_total + host.3y_total)/4)
 flexplot(mps.SPP.3y_total~1, affect_data)
 flexplot(neg_affect_total~1, affect_data)
-
+view(affect_data)
 ##Model visualized
 flexplot(neg_affect_total~tipm_total + sex|mps.SPP.3y_total, affect_data, method = "lm") 
 
@@ -99,9 +106,9 @@ Bivariate correlations
 install.packages("apaTables")
 library(apaTables)
 ##creating a correlation table with means and sds
-correlations <- select(affect_data, ends_with("total"))
-table1 <- apa.cor.table(correlations, table.number = 1, filename = "table1.doc")
-table1
+correlations <- select(affect_data, sex, tipm_total, neg_affect_total, mps.SPP.3y_total)
+table1final <- apa.cor.table(correlations, table.number = 1, filename = "table1.doc")
+table1final
 ```
 
 Hypothesis 1 Results
@@ -148,8 +155,8 @@ Table 2
 ```{r}
 library(apaTables)
 
-table2 <- apa.reg.table(full1,
+table2final <- apa.reg.table(full1,
                         table.number = 2,
                         filename = "table2.doc")
-table2
+table2final
 ```
