@@ -75,6 +75,8 @@ library(tidyverse)
 ##univariate and model visualizations
 flexplot(sex~1, affect_data)
 flexplot(tipm_total~1, affect_data)
+flexplot(mps.SPP.3y_total~1, affect_data)
+flexplot(neg_affect_total~1, affect_data)
 
 ##Model visualized
 flexplot(neg_affect_total~tipm_total + sex|mps.SPP.3y_total, affect_data, method = "lm") 
@@ -90,7 +92,7 @@ visualize(test_model, plot = "residuals")
 ### Bivariate correlations
 
 ```{r}
-install.packages("apaTables")
+##install.packages("apaTables")
 library(apaTables)
 ##creating a correlation table with means and sds
 correlations <- select(affect_data, sex, tipm_total, mps.SPP.3y_total, neg_affect_total)
