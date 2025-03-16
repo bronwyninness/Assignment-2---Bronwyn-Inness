@@ -6,13 +6,16 @@ editor: visual
 
 ## Assignment 2
 
-Importing data and recoding variables
+### Importing data and recoding variables
 
 ```{r}
 library(tidyverse)
 library(haven)
+##reading in the data using the haven package
 affect_data <- read_sav("PSYR6003.A2.sav")
+##viewing the data
 view(affect_data)
+##showing what's in the sex variable
 unique(affect_data$sex)
 
 ##Removing the one data point of "Other (specify)"
@@ -22,20 +25,24 @@ affect_data$sex <- factor(affect_data$sex, levels = c("Female", "Male"), labels 
 view(affect_data)
 view(affect_data$sex)
 
+##getting rid of missing data
 affect_data <- na.omit(affect_data)
 
 ```
 
-TEST DELETE
+Number of female and male participants
 
 ```{r}
-test_data <- mutate(affect_data, test_total = (tipm.CONS1.3y + tipm.CONS2.3y)/2) ##DELETE
-view(test_data)
+##Count how many females (where sex == 0)
+sum(affect_data$sex == 0)
+##Count how many males (where sex == 1)
+sum(affect_data$sex == 1)
 ```
 
-Subscale totals
+### Subscale totals
 
 ```{r}
+##creating new 'total' variables for SPP and negative affect
 affect_data <- mutate(affect_data, 
                       mps.SPP.3y_total = (mps.SPP1.3y + mps.SPP2.3y + mps.SPP3.3y + mps.SPP4.3y + mps.SPP5.3y)/5,
                       guilt.3y_total = (guilt1.3y + guilt2.3y + guilt3.3y)/3,
@@ -44,39 +51,22 @@ affect_data <- mutate(affect_data,
                       host.3y_total = (host1.3y + host2.3y + host3.3y)/3
                       )
 view(affect_data)
+##reverse coding the conscientiousness item
 affect_data <- mutate(affect_data, tipm.CONS2.3y_reversed = 8 - tipm.CONS2.3y)
 
+##conscientiousness total
 affect_data <- mutate(affect_data, tipm_total = (tipm.CONS1.3y + tipm.CONS2.3y_reversed)/2)
 
+##negative affect total
+affect_data <- mutate(affect_data, neg_affect_total = (guilt.3y_total + dep.3y_total + fear.3y_total + host.3y_total)/4)
+flexplot(mps.SPP.3y_total~1, affect_data)
+flexplot(neg_affect_total~1, affect_data)
 view(affect_data)
 
-#summary of perfectionism subscale
-summarise(affect_data, avg_mps.SPP.3y = mean(mps.SPP.3y_total))
-summarise(affect_data, sd_mps.SPP.3y = sd(mps.SPP.3y_total))
-summarise(affect_data, range_mps.SPP.3y = range(mps.SPP.3y_total))
-#summary of guilt subscale
-summarise(affect_data, avg_guilt.3y_total = mean(guilt.3y_total))
-summarise(affect_data, sd_guilt.3y_total = sd(guilt.3y_total))
-summarise(affect_data, range_guilt.3y_total = range(guilt.3y_total))
-##summary of dep subscale
-summarise(affect_data, avg_dep.3y_total = mean(dep.3y_total))
-summarise(affect_data, sd_dep.3y_total = sd(dep.3y_total))
-summarise(affect_data, range_dep.3y_total = range(dep.3y_total))
-##summary of fear subscale
-summarise(affect_data, avg_fear.3y_total = mean(fear.3y_total))
-summarise(affect_data, sd_fear.3y_total = sd(fear.3y_total))
-summarise(affect_data, range_fear.3y_total = range(fear.3y_total))
-##summary of host subscale
-summarise(affect_data, avg_host.3y_total = mean(host.3y_total))
-summarise(affect_data, sd_host.3y_total = sd(host.3y_total))
-summarise(affect_data, range_host.3y_total = range(host.3y_total))
-##summary of conscientiousness subscale
-summarise(affect_data, avg_tipm_total = mean(tipm_total))
-summarise(affect_data, sd_tipm_total = sd(tipm_total))
-summarise(affect_data, range_tipm_total = range(tipm_total))
+view(affect_data)
 ```
 
-Statistical assumptions
+### Statistical assumptions
 
 ```{r}
 library(flexplot)
@@ -85,14 +75,11 @@ library(tidyverse)
 ##univariate and model visualizations
 flexplot(sex~1, affect_data)
 flexplot(tipm_total~1, affect_data)
-affect_data <- mutate(affect_data, neg_affect_total = (guilt.3y_total + dep.3y_total + fear.3y_total + host.3y_total)/4)
-flexplot(mps.SPP.3y_total~1, affect_data)
-flexplot(neg_affect_total~1, affect_data)
-view(affect_data)
+
 ##Model visualized
 flexplot(neg_affect_total~tipm_total + sex|mps.SPP.3y_total, affect_data, method = "lm") 
 
-##AVP plot controlling for sex and conscientiousness (hyp 2)
+##AVP plot controlling for sex and conscientiousness (hypothesis 2)
 added.plot(neg_affect_total~mps.SPP.3y_total, affect_data, lm_formula = neg_affect_total~sex + tipm_total)
 
 ##testing assumptions
@@ -100,23 +87,25 @@ test_model <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_da
 visualize(test_model, plot = "residuals")
 ```
 
-Bivariate correlations
+### Bivariate correlations
 
 ```{r}
 install.packages("apaTables")
 library(apaTables)
 ##creating a correlation table with means and sds
-correlations <- select(affect_data, sex, tipm_total, neg_affect_total, mps.SPP.3y_total)
-table1final <- apa.cor.table(correlations, table.number = 1, filename = "table1.doc")
+correlations <- select(affect_data, sex, tipm_total, mps.SPP.3y_total, neg_affect_total)
+table1final <- apa.cor.table(correlations, table.number = 1, filename = "table1final.doc")
 table1final
 ```
 
-Hypothesis 1 Results
+### Hypothesis 1 Results
 
 ```{r}
 library(tidyverse)
 library(flexplot)
 ##Sex, conscientiousness, and SPP will all significantly predict negative affect, in the manner described above.
+
+##creating the reduced and full models
 reduced1 <- lm(neg_affect_total~1, affect_data)
 full1 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data)
 ##Visualize models
@@ -130,12 +119,14 @@ estimates(full1)
 summary(full1)
 ```
 
-Hypothesis 2 Results
+### Hypothesis 2 Results
 
 ```{r}
 library(tidyverse)
 library(flexplot)
 ##SPP will predict unique variance in negative affect over and above sex and conscientiousness in a meaningful way.
+
+##creating the reduced and full models
 reduced2 <- lm(neg_affect_total~sex + tipm_total, affect_data)
 full2 <- lm(neg_affect_total~mps.SPP.3y_total + sex + tipm_total, affect_data) ##exact same as full1 model, that's okay!!
 ##Visualize models
@@ -150,13 +141,14 @@ estimates(full2)
 summary(full2)
 ```
 
-Table 2
+### Table 2 - Estimates
 
 ```{r}
 library(apaTables)
 
-table2final <- apa.reg.table(full1,
+##this table was edited for the main paper
+table2final <- apa.reg.table(full2,
                         table.number = 2,
-                        filename = "table2.doc")
+                        filename = "table2final.doc")
 table2final
 ```
