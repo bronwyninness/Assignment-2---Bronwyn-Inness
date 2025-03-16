@@ -93,7 +93,7 @@ visualize(test_model, plot = "residuals")
 
 ```{r}
 ##install.packages("apaTables")
-##the above command is will not run as I assume you already have this package installed on your computer
+##the above command is will not run as I assume you already have this package installed on your computer 
 library(apaTables)
 ##creating a correlation table with means and sds
 correlations <- select(affect_data, sex, tipm_total, mps.SPP.3y_total, neg_affect_total)
